@@ -97,10 +97,6 @@ void uart2_init(uint32_t baud_rate)
     // Esto hará que se genere una interrupción cuando RDR tenga un dato.
     USART2->CR1 |= 0x01 << 5;
 
-    // Habilitar la interrupción de USART2 en el NVIC
-    // Esta función se define en nvic.c
-    nvic_usart2_irq_config();
-
     // Finalmente, habilitar USART (UE bit en CR1)
     USART2->CR1 |= USART_CR1_UE;
 }

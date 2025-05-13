@@ -56,6 +56,19 @@ typedef struct {
 #define GPIO_PIN_SET        1U
 
 
+#define HEARTBEAT_LED_PIN           5     // PA5 para LD2
+#define HEARTBEAT_LED_PORT       GPIOA // Ya conocido por el driver GPIO
+
+#define EXTERNAL_LED_PWM_PIN        6     // PA6 (TIM3_CH1)
+#define EXTERNAL_LED_PWM_PORT    GPIOA
+
+#define EXTERNAL_LED_ONOFF_PIN      7     // PA7 para emulacion de estado de puerta
+#define EXTERNAL_LED_ONOFF_PORT  GPIOA
+
+#define USER_BUTTON_PIN             13    // PC13 para B1
+#define USER_BUTTON_PIN          GPIOC    
+
+
 // Prototipos de funciones
 void gpio_pin_setup(GPIO_TypeDef *gpio_port, uint8_t pin_number,
                     uint8_t mode, uint8_t alternate_function);
@@ -74,8 +87,6 @@ void gpio_toggle_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 #include "gpio.h"
 #include "rcc.h"
 #include "nvic.h"
-
-uint8_t button_pressed = 0;
 
 void gpio_pin_setup(GPIO_TypeDef *gpio_port, uint8_t pin_number,
                     uint8_t mode, uint8_t alternate_function)
@@ -142,8 +153,7 @@ void EXTI15_10_IRQHandler(void) {
     if ((EXTI->PR1 & (1U << 13)) != 0) {
         // 2. Limpiar el flag de pendiente de la interrupción (escribiendo '1')
         EXTI->PR1 |= (1U << 13);
-        // 3. activar la bandera de boton presionado
-        button_pressed = 1;
+        // 3. Procesar boton presionado
     }
 }
 

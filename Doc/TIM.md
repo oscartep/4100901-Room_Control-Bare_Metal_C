@@ -83,7 +83,6 @@ void tim3_ch1_pwm_init(uint32_t pwm_freq_hz)
     // Configurar el Canal 1 (CH1) en modo PWM 1
     TIM2->CCMR1 = (6U << 4);                    // PWM mode 1 on CH1
     TIM2->CCER  |= (1 << 0);                    // Enable CH1 output
-    tim3_ch1_pwm_set_duty_cycle(0);             // Duty Cycle 0 inicialmente
 
     // Finalmente, habilitar el contador del timer (CEN bit en CR1)
     TIM3->CR1 |= 0x01 << 0;

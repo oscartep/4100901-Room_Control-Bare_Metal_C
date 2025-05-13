@@ -69,7 +69,6 @@ typedef struct {
 #define EXTI_BASE           (0x40010400UL)
 #define NVIC_BASE           (0xE000E100UL)
 
-
 #define SYSCFG              ((SYSCFG_TypeDef *) SYSCFG_BASE)
 #define EXTI                ((EXTI_TypeDef *)   EXTI_BASE)
 #define NVIC                ((NVIC_Type *)      NVIC_BASE)
@@ -176,7 +175,6 @@ void nvic_usart2_irq_config(void);       // Habilita USART2 IRQ en NVIC (la conf
 
 ```c
 #include "nvic.h"
-#include "gpio.h" // Para configurar PC13 como entrada y usar GPIOC
 #include "rcc.h"  // Para habilitar relojes de GPIOC y SYSCFG
 
 
@@ -186,17 +184,14 @@ static void nvic_enable_irq(uint32_t IRQn)
 }
 
 void nvic_exti_pc13_button_config(void) {
-    // 1. Configurar PC13 como entrada
-    gpio_pin_setup(GPIOC, 13, GPIO_MODE_INPUT, 0);
-
-    // 2. Habilitar el reloj para SYSCFG
+    // 1. Habilitar el reloj para SYSCFG
     rcc_syscfg_clock_enable(); // SYSCFG es necesario para mapear EXTI a GPIO
 
-    // 3. Configurar la línea EXTI13 (SYSCFG_EXTICR)
+    // 2. Configurar la línea EXTI13 (SYSCFG_EXTICR)
     SYSCFG->EXTICR[3] &= ~(0x000FU << 4);  // Limpiar campo EXTI13 (bits 7-4)
     SYSCFG->EXTICR[3] |=  (0x0002U << 4);  // Conectar EXTI13 a PC13 (0b0010 para PCx)
 
-    // 4. Configurar la línea EXTI13 para interrupción (EXTI_IMR1)
+    // 3. Configurar la línea EXTI13 para interrupción (EXTI_IMR1)
     EXTI->IMR1 |= (1U << 13);
 
     // 5. Configurar el trigger de flanco de bajada (EXTI_FTSR1)
@@ -214,4 +209,4 @@ void nvic_usart2_irq_config(void) {
 
 ```
 
-Siguiente módulo: [Room Controller (ROOM_CONTROLLER.md)](ROOM_CONTROLLER.md).
+Siguiente módulo: [Room Controller (ROOM_CONTROL.md)](ROOM_CONTROL.md).
