@@ -71,4 +71,4 @@ Realiza las siguientes conexiones en tu protoboard:
     *   Abre tu terminal serial, conéctate al puerto COM correspondiente al ST-Link de tu Nucleo.
     *   Configuración: 115200 baudios, 8 bits de datos, sin paridad, 1 bit de parada (8N1).
 
-Ahora estás listo para empezar a desarrollar los módulos. Dirígete a [Infraestructura del Proyecto (Doc/INFRASTRUCTURE.md)](Doc/INFRASTRUCTURE.md).
+Ahora estás listo para empezar a desarrollar los módulos. Dirígete a [Reset and Clock Control (RCC.md)](RCC.md).
