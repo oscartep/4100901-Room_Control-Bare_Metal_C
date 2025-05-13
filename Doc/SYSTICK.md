@@ -3,6 +3,7 @@
 SysTick es un temporizador simple de cuenta descendente de 24 bits integrado en el núcleo Cortex-M. Es comúnmente usado para generar una base de tiempo periódica (tick del sistema) para tareas como retardos, timeouts o una planificación simple de tareas.
 
 **Archivos:** `Inc/systick.h`, `Src/systick.c`
+
 **Referencia Principal:** PM0214 (Cortex-M4 Devices Generic User Guide), Sección 4.5 SysTick timer (STK).
 
 ## Objetivos del Módulo SysTick
@@ -52,11 +53,9 @@ void systick_delay_ms(uint32_t ms);
 // y leída en el flujo principal del programa.
 static volatile uint32_t g_systick_ms_count = 0;
 
-/**
- * @brief Inicializa SysTick para generar interrupciones cada 1 ms.
- *        Utiliza SYSCLK_FREQ_HZ definido en rcc.h (4MHz).
- */
-void systick_init_1ms(void) {
+
+void systick_init_1ms(void)
+{
     // 1. Calcular el valor de recarga para 1 ms
     uint32_t reload_value = (SYSCLK_FREQ_HZ / 1000U) - 1U; // (4000000 / 1000) - 1 = 3999
 
@@ -72,39 +71,24 @@ void systick_init_1ms(void) {
                     (0x01 << 0) ; // Habilita el contador SysTick
 }
 
-/**
- * @brief Obtiene el número de milisegundos transcurridos desde la inicialización de SysTick.
- * @return uint32_t: Contador de ticks en milisegundos.
- */
-uint32_t systick_get_tick(void) {
+uint32_t systick_get_tick(void)
+{
     return g_systick_ms_count;
 }
 
-/**
- * @brief Genera un retardo bloqueante en milisegundos.
- * @param ms: Número de milisegundos para el retardo.
- */
-void systick_delay_ms(uint32_t ms) {
-    uint32_t start_tick = systick_get_tick();
-    // Espera hasta que la diferencia de ticks alcance 'ms'
-    // Cuidado con el desbordamiento de g_systick_ms_count si ms es muy grande
-    // y el sistema lleva mucho tiempo encendido. Para este taller es aceptable.
+
+void systick_delay_ms(uint32_t ms)
+{
+    uint32_t start_tick = systick_get_tick(); 
     while ((systick_get_tick() - start_tick) < ms) {
-        // Espera activa (busy-waiting).
-        // Para retardos largos o en sistemas que requieren bajo consumo,
-        // se preferirían otros métodos (ej. __WFI() y despertar por interrupción).
+        // Espera hasta que hayan transcurridos los milisegundos deseados
     }
 }
 
-/**
- * @brief Rutina de Servicio de Interrupción para SysTick.
- *        Este nombre debe coincidir exactamente con el definido en la tabla de vectores
- *        del archivo de arranque (startup_stm32l476rgtx.s).
- *        Se llama cada 1 ms.
- */
-void SysTick_Handler(void) {
-    // Incrementar el contador de ticks global
-    g_systick_ms_count++;
+
+void SysTick_Handler(void)
+{
+    g_systick_ms_count++; // Incrementar el contador de ticks global
 }
 
 ```
@@ -113,4 +97,7 @@ void SysTick_Handler(void) {
 
 * En main.c, se llamará a systick_init_1ms().
 
-* La variable g_systick_ms_count o la función systick_get_tick() se usará para gestionar temporizaciones en el módulo room_control.
+* La variable g_systick_ms_count o la función systick_get_tick() se usará para gestionar temporizaciones a nivel global del programa.
+
+
+Siguiente módulo: [General Purpose Input/Output (GPIO.md)](GPIO.md).

@@ -28,8 +28,8 @@ Implementar un sistema embebido que gestione LEDs, lea un botón, controle un LE
 Esta guía está dividida en varias secciones para facilitar el proceso de desarrollo:
 
 1.  **[Configuración del Entorno (Doc/SETUP.md)](Doc/SETUP.md):** Preparación del hardware y el entorno de desarrollo.
-2.  **[Módulo SysTick (Doc/SYSTICK.md)](Doc/SYSTICK.md):** Configuración del temporizador del sistema para tareas periódicas.
-3.  **[Módulo RCC (Doc/RCC.md)](Doc/RCC.md):** Configuración del sistema de reloj.
+2.  **[Módulo RCC (Doc/RCC.md)](Doc/RCC.md):** Configuración del sistema de reloj.
+3.  **[Módulo SysTick (Doc/SYSTICK.md)](Doc/SYSTICK.md):** Configuración del temporizador del sistema para manejo del tiempo.
 4.  **[Módulo GPIO (Doc/GPIO.md)](Doc/GPIO.md):** Configuración y manejo de pines de entrada/salida.
 5.  **[Módulo UART (Doc/UART.md)](Doc/UART.md):** Implementación de comunicación serial.
 6.  **[Módulo TIM/PWM (Doc/TIM.md)](Doc/TIM.md):** Generación de señales PWM.

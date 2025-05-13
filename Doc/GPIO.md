@@ -23,16 +23,16 @@ El periférico GPIO permite configurar los pines del microcontrolador como entra
 #include <stdint.h>
 
 typedef struct {
-    volatile uint32_t MODER;
-    volatile uint32_t OTYPER;
-    volatile uint32_t OSPEEDR;
-    volatile uint32_t PUPDR;
-    volatile uint32_t IDR;
-    volatile uint32_t ODR;
+    volatile uint32_t MODER;   // 00: Input, 01: Output, 10: Alternate, 11: Analog
+    volatile uint32_t OTYPER;  // 0: Push-Pull, 1: Open Drain 
+    volatile uint32_t OSPEEDR; // 00: Low speed, 01: Medium, 10: High, 11: Very High
+    volatile uint32_t PUPDR;   // 00: No-Pull, 01: Pull-Up, 10: Pull-Down
+    volatile uint32_t IDR;     // 0: Reset (low), 1: Set (High)
+    volatile uint32_t ODR;     // 0: Reset (low), 1: Set (High)
     volatile uint32_t BSRR;
     volatile uint32_t LCKR;
-    volatile uint32_t AFRL;
-    volatile uint32_t AFRH;
+    volatile uint32_t AFRL;    // To connect a pin(0-7) to a peripheral like UART, SPI, PWM, etc
+    volatile uint32_t AFRH;    // To connect a pin(8-15) to a peripheral like UART, SPI, PWM, etc
 } GPIO_TypeDef;
 
 
@@ -51,37 +51,18 @@ typedef struct {
 #define GPIO_MODE_AF        0x02U // 10: Alternate function mode
 #define GPIO_MODE_ANALOG    0x03U // 11: Analog mode
 
-// Tipos de Salida (para GPIOx_OTYPER)
-#define GPIO_OTYPE_PUSHPULL  0x00U // 0: Output push-pull (reset state)
-#define GPIO_OTYPE_OPENDRAIN 0x01U // 1: Output open-drain
-
-// Velocidades de Salida (para GPIOx_OSPEEDR)
-#define GPIO_OSPEED_LOW     0x00U // 00: Low speed
-#define GPIO_OSPEED_MEDIUM  0x01U // 01: Medium speed
-#define GPIO_OSPEED_HIGH    0x02U // 10: High speed
-#define GPIO_OSPEED_VHIGH   0x03U // 11: Very high speed
-
-// Pull-up/Pull-down (para GPIOx_PUPDR)
-#define GPIO_PUPD_NONE      0x00U // 00: No pull-up, pull-down
-#define GPIO_PUPD_PULLUP    0x01U // 01: Pull-up
-#define GPIO_PUPD_PULLDOWN  0x02U // 10: Pull-down
-
 // Estados de Pin
 #define GPIO_PIN_RESET      0U
 #define GPIO_PIN_SET        1U
 
-// Prototipos de funciones
-void gpio_pin_setup(GPIO_TypeDef *gpio_port,
-                    uint8_t pin_number,
-                    uint8_t mode,
-                    uint8_t output_type,
-                    uint8_t output_speed,
-                    uint8_t pull_up_down,
-                    uint8_t alternate_function);
 
+// Prototipos de funciones
+void gpio_pin_setup(GPIO_TypeDef *gpio_port, uint8_t pin_number,
+                    uint8_t mode, uint8_t alternate_function);
+
+uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 void gpio_write_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number, uint8_t pin_state);
 void gpio_toggle_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
-uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 
 #endif // GPIO_H
 
@@ -94,13 +75,10 @@ uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 #include "rcc.h"
 #include "nvic.h"
 
-void gpio_pin_setup(GPIO_TypeDef *gpio_port,
-                    uint8_t pin_number,
-                    uint8_t mode,
-                    uint8_t output_type,
-                    uint8_t output_speed,
-                    uint8_t pull_up_down,
-                    uint8_t alternate_function)
+uint8_t button_pressed = 0;
+
+void gpio_pin_setup(GPIO_TypeDef *gpio_port, uint8_t pin_number,
+                    uint8_t mode, uint8_t alternate_function)
 {
 
     // 1. Habilitar el reloj para el puerto GPIO correspondiente
@@ -112,26 +90,7 @@ void gpio_pin_setup(GPIO_TypeDef *gpio_port,
     gpio_port->MODER &= ~(0x03U << (pin_number * 2)); // Limpiar los 2 bits del pin
     gpio_port->MODER |= (mode << (pin_number * 2));   // Establecer el modo
 
-    // 3. Configurar el tipo de salida (Push-Pull o Open-Drain)
-    //    Solo si es modo Output o AF. Cada pin usa 1 bit en OTYPER.
-    if (mode == GPIO_MODE_OUTPUT || mode == GPIO_MODE_AF) {
-        gpio_port->OTYPER &= ~(0x01U << pin_number);         // Limpiar el bit
-        gpio_port->OTYPER |= (output_type << pin_number); // Establecer el tipo
-    }
-
-    // 4. Configurar la velocidad de salida
-    //    Solo si es modo Output o AF. Cada pin usa 2 bits en OSPEEDR.
-    if (mode == GPIO_MODE_OUTPUT || mode == GPIO_MODE_AF) {
-        gpio_port->OSPEEDR &= ~(0x03U << (pin_number * 2));    // Limpiar los 2 bits del pin
-        gpio_port->OSPEEDR |= (output_speed << (pin_number * 2)); // Establecer la velocidad
-    }
-
-    // 5. Configurar Pull-up/Pull-down
-    //    Cada pin usa 2 bits en PUPDR.
-    gpio_port->PUPDR &= ~(0x03U << (pin_number * 2));       // Limpiar los 2 bits del pin
-    gpio_port->PUPDR |= (pull_up_down << (pin_number * 2)); // Establecer pull-up/down
-
-    // 6. Configurar la función alternativa
+    // 3. Configurar la función alternativa
     //    Solo si es modo AF. Cada pin usa 4 bits.
     //    Pines 0-7 usan AFRL, pines 8-15 usan AFRH.
     if (mode == GPIO_MODE_AF) {
@@ -152,7 +111,8 @@ void gpio_write_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number, uint8_t pin_sta
         // Establecer el bit correspondiente en BSRR (parte baja para SET)
         gpio_port->BSRR = (1U << pin_number);
     } else {
-        gpio_port->BRR = (1U << pin_number);
+        // Establecer el bit correspondiente en BSRR (parte alta para RESET)
+        gpio_port->BSRR = (1U << (pin_number + 16));
     }
 }
 
@@ -182,9 +142,8 @@ void EXTI15_10_IRQHandler(void) {
     if ((EXTI->PR1 & (1U << 13)) != 0) {
         // 2. Limpiar el flag de pendiente de la interrupción (escribiendo '1')
         EXTI->PR1 |= (1U << 13);
-
-        // 3. Ejecutar la acción correspondiente al botón presionado.
-        //    Llamar a room_control_button_action();
+        // 3. activar la bandera de boton presionado
+        button_pressed = 1;
     }
 }
 
@@ -195,30 +154,32 @@ void EXTI15_10_IRQHandler(void) {
 
 * PA5 (LD2 - Heartbeat): 
 ```c
-gpio_pin_setup(GPIOA, 5, GPIO_MODE_OUTPUT, GPIO_OTYPE_PUSHPULL, GPIO_OSPEED_LOW, GPIO_PUPD_NONE, 0);
+gpio_pin_setup(GPIOA, 5, GPIO_MODE_OUTPUT, 0);
 ```
 
 * PA4 (LED Externo ON/OFF):
 ```c
-gpio_pin_setup(GPIOA, 4, GPIO_MODE_OUTPUT, GPIO_OTYPE_PUSHPULL, GPIO_OSPEED_LOW, GPIO_PUPD_NONE, 0);
+gpio_pin_setup(GPIOA, 4, GPIO_MODE_OUTPUT, 0);
 ```
 
 * PC13 (Botón B1 - para EXTI):
 ```c
-gpio_pin_setup(GPIOC, 13, GPIO_MODE_INPUT, 0, 0, GPIO_PUPD_NONE, 0); // (El pull-up es externo en la Nucleo).
+gpio_pin_setup(GPIOC, 13, GPIO_MODE_INPUT, 0);
 ```
 
 * PB4 (LED Externo PWM - TIM3_CH1):
 ```c
-gpio_pin_setup(GPIOB, 4, GPIO_MODE_AF, GPIO_OTYPE_PUSHPULL, GPIO_OSPEED_MEDIUM, GPIO_PUPD_NONE, 2); (AF2 para TIM3 en PB4)
+gpio_pin_setup(GPIOB, 4, GPIO_MODE_AF, 2); // (AF2 para TIM3_CH1 en PA6)
 ```
 
 * PA2 (USART2_TX):
 ```c
-gpio_pin_setup(GPIOA, 2, GPIO_MODE_AF, GPIO_OTYPE_PUSHPULL, GPIO_OSPEED_HIGH, GPIO_PUPD_NONE, 7); (AF7 para USART2 en PA2)
+gpio_pin_setup(GPIOA, 2, GPIO_MODE_AF, 7); // (AF7 para USART2 en PA2)
 ```
 
 * PA3 (USART2_RX):
 ```c
-gpio_pin_setup(GPIOA, 3, GPIO_MODE_AF, GPIO_OTYPE_PUSHPULL, GPIO_OSPEED_HIGH, GPIO_PUPD_PULLUP, 7);
+gpio_pin_setup(GPIOA, 3, GPIO_MODE_AF, 7); // (AF7 para USART2 en PA2)
 ```
+
+Siguiente módulo: [Universal Asynchronous Receiver/Transmitter (UART.md)](UART.md).

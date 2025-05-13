@@ -3,11 +3,12 @@
 El periférico RCC es fundamental para el funcionamiento del microcontrolador, ya que gestiona la habilitación/deshabilitación de los relojes para los periféricos. ***Sin un reloj habilitado, un periférico no funcionará***.
 
 **Archivos:** `Inc/rcc.h`, `Src/rcc.c`
+
 **Referencia Principal:** RM0351, Sección "6. Reset and clock control (RCC)".
 
 ## Objetivos del Módulo RCC
 1.  Proporcionar funciones para habilitar los relojes de los periféricos GPIO, TIM3, USART2, y SYSCFG.
-2.  Definir las frecuencias de reloj que se usarán como base para la configuración de otros periféricos (SysTick, UART, TIM), consistentes con los talleres anteriores.
+2.  Definir las frecuencias de reloj que se usarán como base para la configuración de otros periféricos (SysTick, UART, TIM), consistentes con los talleres anteriores del curso.
 
 ## 1. `Inc/rcc.h`
 
@@ -45,22 +46,22 @@ typedef struct {
     volatile uint32_t APB2ENR;
 } RCC_TypeDef;
 
-#define RCC_BASE (0x40021000U)
 
+#define RCC_BASE (0x40021000U)
 #define RCC ((RCC_TypeDef *)RCC_BASE)
 
 // Macros
-#define SYSCLK_FREQ_HZ    4000000UL  
-#define HCLK_FREQ_HZ      SYSCLK_FREQ_HZ
+#define SYSCLK_FREQ_HZ    4000000UL      // 4MHz
+#define HCLK_FREQ_HZ      SYSCLK_FREQ_HZ // HCLK Prescaler = 1
 #define PCLK1_FREQ_HZ     HCLK_FREQ_HZ   // APB1 Prescaler = 1
 #define PCLK2_FREQ_HZ     HCLK_FREQ_HZ   // APB2 Prescaler = 1
 #define TIM_PCLK_FREQ_HZ  PCLK1_FREQ_HZ  // TIM3 está en APB1
 
 // Prototipos de funciones
 void rcc_gpio_clock_enable(GPIO_TypeDef *gpio_port);
+void rcc_syscfg_clock_enable(void);
 void rcc_usart2_clock_enable(void);
 void rcc_tim3_clock_enable(void);
-void rcc_syscfg_clock_enable(void);
 
 #endif // RCC_H
 
@@ -70,8 +71,10 @@ void rcc_syscfg_clock_enable(void);
 
 ```c
 #include "rcc.h"
+#include "gpio.h"
 
-void rcc_gpio_clock_enable(GPIO_TypeDef *gpio_port) {
+void rcc_gpio_clock_enable(GPIO_TypeDef *gpio_port)
+{
     if (gpio_port == GPIOA) {
         RCC->AHB2ENR |= 0x01 << 0;
     } else if (gpio_port == GPIOB) {
@@ -80,20 +83,23 @@ void rcc_gpio_clock_enable(GPIO_TypeDef *gpio_port) {
         RCC->AHB2ENR |= 0x01 << 2;
     }
     // Añadir más puertos GPIO si son necesarios (D, E, F, G, H)
-
-    // Pequeña espera después de habilitar el reloj para asegurar que esté estable
-    // Esto se logra con una lectura ficticia del registro.
 }
 
-void rcc_usart2_clock_enable(void) {
+void rcc_syscfg_clock_enable(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+}
+
+void rcc_usart2_clock_enable(void)
+{
     RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
 }
 
-void rcc_tim3_clock_enable(void) {
+void rcc_tim3_clock_enable(void)
+{
     RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN;
 }
 
-void rcc_syscfg_clock_enable(void) {
-    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-}
 ```
+
+Siguiente módulo: [System Tick Timer (SYSTICK.md)](SYSTICK.md).
