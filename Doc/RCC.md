@@ -17,6 +17,7 @@ El periférico RCC es fundamental para el funcionamiento del microcontrolador, y
 #define RCC_H
 
 #include <stdint.h>
+#include "gpio.h"
 
 typedef struct {
     volatile uint32_t CR;
@@ -71,7 +72,6 @@ void rcc_tim3_clock_enable(void);
 
 ```c
 #include "rcc.h"
-#include "gpio.h"
 
 void rcc_gpio_clock_enable(GPIO_TypeDef *gpio_port)
 {
@@ -87,17 +87,17 @@ void rcc_gpio_clock_enable(GPIO_TypeDef *gpio_port)
 
 void rcc_syscfg_clock_enable(void)
 {
-    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+    RCC->APB2ENR |= 0x01 << 0; // SYSCFG clock enable
 }
 
 void rcc_usart2_clock_enable(void)
 {
-    RCC->APB1ENR1 |= RCC_APB1ENR1_USART2EN;
+    RCC->APB1ENR1 |= 0x01 << 17; // USART2 clock enable
 }
 
 void rcc_tim3_clock_enable(void)
 {
-    RCC->APB1ENR1 |= RCC_APB1ENR1_TIM3EN;
+    RCC->APB1ENR1 |= 0x01 << 1; // TIM3 clock enable
 }
 
 ```

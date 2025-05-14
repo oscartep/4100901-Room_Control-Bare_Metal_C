@@ -28,15 +28,17 @@ El periférico USART/UART permite la comunicación serial asíncrona, comúnment
 
 // Estructura para los registros de USART
 typedef struct {
+    volatile uint32_t CR1;
+    volatile uint32_t CR2;
+    volatile uint32_t CR3;
+    volatile uint32_t BRR;
+    volatile uint32_t GTPR;
+    volatile uint32_t RTOR;
+    volatile uint32_t RQR;
     volatile uint32_t ISR;
     volatile uint32_t ICR;
     volatile uint32_t RDR;
     volatile uint32_t TDR;
-    volatile uint32_t BRR;
-    volatile uint32_t CR1;
-    volatile uint32_t CR2;
-    volatile uint32_t CR3;
-    volatile uint32_t GTPR;
 } USART_TypeDef;
 
 #define USART2_BASE         (0x40004400UL)
@@ -58,7 +60,6 @@ void uart2_send_string(const char *str);
 #include "uart.h"
 #include "rcc.h"  // Para rcc_usart2_clock_enable y PCLK1_FREQ_HZ
 #include "gpio.h" // Para configurar pines PA2, PA3
-#include "nvic.h" // Para nvic_usart2_irq_config y la declaración de USART2_IRQn
 
 
 // USART_ISR bits
@@ -67,16 +68,11 @@ void uart2_send_string(const char *str);
 #define USART_ISR_RXNE_Pos      5U  // Read Data Register Not Empty
 #define USART_ISR_RXNE          (1UL << USART_ISR_RXNE_Pos)
 
-// USART_ICR bits (Interrupt Clear Register)
-#define USART_ICR_ORECF_Pos     3U  // Overrun Error Clear Flag (si se maneja error)
-#define USART_ICR_ORECF         (1UL << USART_ICR_ORECF_Pos)
-
-
 void uart2_init(uint32_t baud_rate)
 {
     // 1. Configurar pines PA2 (TX) y PA3 (RX) como Alternate Function (AF7)
-    gpio_pin_setup(GPIOA, 2, GPIO_MODE_AF, 7);
-    gpio_pin_setup(GPIOA, 3, GPIO_MODE_AF, 7);
+    gpio_setup_pin(GPIOA, 2, GPIO_MODE_AF, 7);
+    gpio_setup_pin(GPIOA, 3, GPIO_MODE_AF, 7);
 
     // 2. Habilitar el reloj para USART2
     rcc_usart2_clock_enable();
@@ -93,12 +89,8 @@ void uart2_init(uint32_t baud_rate)
     // Habilitar Transmisor (TE) y Receptor (RE)
     USART2->CR1 |= (0x01 << 2 | 0x01 << 3);
 
-    // Habilitar interrupción de recepción (RXNEIE - Read Data Register Not Empty Interrupt Enable)
-    // Esto hará que se genere una interrupción cuando RDR tenga un dato.
-    USART2->CR1 |= 0x01 << 5;
-
     // Finalmente, habilitar USART (UE bit en CR1)
-    USART2->CR1 |= USART_CR1_UE;
+    USART2->CR1 |= 0x01 << 0;
 }
 
 void uart2_send_char(char c)
@@ -125,14 +117,9 @@ void USART2_IRQHandler(void)
     if (USART2->ISR & USART_ISR_RXNE) {
         // Leer el dato del RDR. Esta acción usualmente limpia el flag RXNE.
         char received_char = (char)(USART2->RDR & 0xFF);
+        uart2_send_char(received_char); // Eco del carácter recibido 
         // Procesar el carácter recibido.
     }
-
-    // Aquí se podrían manejar otros flags de interrupción de USART2 si se habilitaron
-    // (ej. TXE para transmisión por interrupción, TC para transmisión completa, errores ORE, FE, NE).
-    // if (USART2->ISR & USART_ISR_ORE) { // Overrun error
-    //    USART2->ICR |= USART_ICR_ORECF; // Clear overrun flag
-    // }
 }
 
 ```

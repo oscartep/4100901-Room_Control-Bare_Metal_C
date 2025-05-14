@@ -18,7 +18,6 @@ En este taller, `main()` será responsable de:
 ## Estructura de `Src/main.c` (Esqueleto Sugerido)
 
 ```c
-#include "rcc.h"
 #include "gpio.h"
 #include "systick.h"
 #include "nvic.h"
@@ -26,37 +25,46 @@ En este taller, `main()` será responsable de:
 #include "tim.h"
 #include "room_control.h"
 
+void heartbeat_led_toggle(void)
+{
+    static uint32_t last_tick = 0;
+    if (systick_get_tick() - last_tick >= 500) { // Cambia cada 500 ms
+        gpio_toggle_pin(HEARTBEAT_LED_PORT, HEARTBEAT_LED_PIN);
+        last_tick = systick_get_tick();
+    }
+}
+
 
 int main(void)
 {
     // Inicialización de SysTick
     systick_init_1ms(); // Utiliza SYSCLK_FREQ_HZ (ej. 4MHz) de rcc.h
 
-    // LED Heartbeat (LD2 en PA5)
-    gpio_pin_setup(GPIOA, HEARTBEAT_LED_PIN, GPIO_MODE_OUTPUT, 0);
+    // LED Heartbeat
+    gpio_setup_pin(GPIOA, HEARTBEAT_LED_PIN, GPIO_MODE_OUTPUT, 0);
 
-    // LED Externo ON/OFF (PA4)
-    gpio_pin_setup(GPIOA, EXTERNAL_LED_ONOFF_PIN, GPIO_MODE_OUTPUT, 0);
+    // LED Externo ON/OFF
+    gpio_setup_pin(GPIOA, EXTERNAL_LED_ONOFF_PIN, GPIO_MODE_OUTPUT, 0);
 
-    // Botón B1 (PC13) y su interrupción EXTI
-    gpio_pin_setup(GPIOC, 13, GPIO_MODE_INPUT, 0);
-    nvic_exti_pc13_button_config();
+    // Botón B1
+    gpio_setup_pin(GPIOC, 13, GPIO_MODE_INPUT, 0);
+    nvic_exti_pc13_button_enable();
 
-    // USART2 (PA2 TX, PA3 RX)
-    uart2_init();
-    nvic_usart2_irq_config();
+    // USART2
+    uart2_init(115200);
+    nvic_usart2_irq_enable();
 
-    // TIM3 Canal 1 para PWM (PB4)
-    tim3_ch1_pwm_init(PWM_FREQUENCY_HZ); // ej. 1000 Hz
-    tim3_ch1_pwm_set_duty_cycle(PWM_INITIAL_DUTY); // ej. 50%
+    // TIM3 Canal 1 para PWM
+    tim3_ch1_pwm_init(1000); // ej. 1000 Hz
+    tim3_ch1_pwm_set_duty_cycle(70); // ej. 50%
 
     // Inicialización de la Lógica de la Aplicación (room_control)
     room_control_app_init();
 
     // Mensaje de bienvenida o estado inicial (puede estar en room_control_app_init o aquí)
-    uart2_send_string("Sistema Inicializado. Esperando eventos...\r\n");
+    uart2_send_string("\r\nSistema Inicializado. Esperando eventos...\r\n");
     while (1) {
-        __asm volatile ("wfi"); // Wait For Interrupt
+        heartbeat_led_toggle();
     }
 }
 

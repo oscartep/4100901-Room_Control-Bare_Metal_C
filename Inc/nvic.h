@@ -1,22 +1,10 @@
-# Módulo NVIC y Configuración de Interrupciones (EXTI, USART)
-
-El NVIC (Nested Vectored Interrupt Controller) gestiona las prioridades y la habilitación de las interrupciones. Para que una interrupción de un periférico llegue al procesador, no solo debe estar habilitada en el periférico mismo (y en EXTI/SYSCFG si aplica), sino también en el NVIC.
-
-Este módulo se enfocará en:
-1.  Definir la estructura `NVIC_TypeDef` para el acceso a los registros del NVIC.
-2.  Proporcionar funciones para habilitar interrupciones específicas en el NVIC, como `EXTI15_10_IRQn` (para el botón) y `USART2_IRQn`.
-3.  Configurar los periféricos que generan estas interrupciones (SYSCFG/EXTI para el botón, USART2 para la comunicación serial).
-
-**Archivos:** `Inc/nvic.h`, `Src/nvic.c`
-
-**Referencias Principales:**
-*   PM0214 (Cortex-M4 Devices Generic User Guide), Sección 4.3 Nested Vectored Interrupt Controller (NVIC).
-*   RM0351, Sección "14. Extended interrupts and events controller (EXTI)".
-*   RM0351, Sección "9.2.3 SYSCFG configuration registers".
-
-## 1. `Inc/nvic.h`
-
-```c
+/**
+ ******************************************************************************
+ * @file           : nvic.h
+ * @author         : sam C
+ * @brief          : Header file for NVIC driver for STM32L476RGTx
+ ******************************************************************************
+ */
 #ifndef NVIC_H
 #define NVIC_H
 
@@ -168,48 +156,3 @@ void nvic_exti_pc13_button_enable(void); // Configura EXTI13 y habilita su IRQ e
 void nvic_usart2_irq_enable(void);       // Habilita USART2 IRQ en NVIC (la config. de USART2 se hace en uart.c)
 
 #endif // NVIC_H
-
-```
-
-## 2. `Src/nvic.c`
-
-```c
-#include "nvic.h"
-#include "rcc.h"  // Para habilitar relojes de GPIOC y SYSCFG
-#include "uart.h"
-
-
-static void nvic_enable_irq(uint32_t IRQn)
-{
-    NVIC->ISER[IRQn / 32U] |= (1UL << (IRQn % 32U));
-}
-
-void nvic_exti_pc13_button_enable(void) {
-    // 1. Habilitar el reloj para SYSCFG
-    rcc_syscfg_clock_enable(); // SYSCFG es necesario para mapear EXTI a GPIO
-
-    // 2. Configurar la línea EXTI13 (SYSCFG_EXTICR)
-    SYSCFG->EXTICR[3] &= ~(0x000FU << 4);  // Limpiar campo EXTI13 (bits 7-4)
-    SYSCFG->EXTICR[3] |=  (0x0002U << 4);  // Conectar EXTI13 a PC13 (0b0010 para PCx)
-
-    // 3. Configurar la línea EXTI13 para interrupción (EXTI_IMR1)
-    EXTI->IMR1 |= (1U << 13);
-
-    // 5. Configurar el trigger de flanco de bajada (EXTI_FTSR1)
-    EXTI->FTSR1 |= (1U << 13); // Habilitar trigger de flanco de bajada para línea 13
-    EXTI->RTSR1 &= ~(1U << 13); // Deshabilitar (no necesitamos detectar el flanco de subida)
-
-    // 6. Habilitar la interrupción EXTI15_10 en el NVIC
-    nvic_enable_irq(EXTI15_10_IRQn);
-}
-
-void nvic_usart2_irq_enable(void) {
-    // Habilitar interrupción de recepción (RXNEIE - Read Data Register Not Empty Interrupt Enable)
-    // Esto hará que se genere una interrupción cuando RDR tenga un dato.
-    USART2->CR1 |= 0x01 << 5;
-    nvic_enable_irq(USART2_IRQn);
-}
-
-```
-
-Siguiente módulo: [Room Controller (ROOM_CONTROL.md)](ROOM_CONTROL.md).

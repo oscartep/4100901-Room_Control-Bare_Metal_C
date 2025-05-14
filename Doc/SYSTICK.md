@@ -38,7 +38,6 @@ void systick_delay_ms(uint32_t ms);
 
 #endif // SYSTICK_H
 
-
 ```
 
 ## 2. `Src/systick.c`

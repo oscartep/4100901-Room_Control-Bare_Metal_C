@@ -71,7 +71,7 @@ void tim3_ch1_pwm_set_duty_cycle(uint8_t duty_cycle_percent); // duty_cycle en %
 void tim3_ch1_pwm_init(uint32_t pwm_freq_hz)
 {
     // 1. Configurar PA6 como Alternate Function (AF2) para TIM3_CH1
-    gpio_pin_setup(GPIOA, 6, GPIO_MODE_AF, 2);
+    gpio_setup_pin(GPIOA, 6, GPIO_MODE_AF, 2);
 
     // 2. Habilitar el reloj para TIM3
     rcc_tim3_clock_enable();
@@ -81,8 +81,8 @@ void tim3_ch1_pwm_init(uint32_t pwm_freq_hz)
     TIM3->ARR = (TIM_PCLK_FREQ_HZ / 100 / pwm_freq_hz) - 1; // 40kHz / pwm_freq_hz
 
     // Configurar el Canal 1 (CH1) en modo PWM 1
-    TIM2->CCMR1 = (6U << 4);                    // PWM mode 1 on CH1
-    TIM2->CCER  |= (1 << 0);                    // Enable CH1 output
+    TIM3->CCMR1 = (6U << 4);                    // PWM mode 1 on CH1
+    TIM3->CCER  |= (1 << 0);                    // Enable CH1 output
 
     // Finalmente, habilitar el contador del timer (CEN bit en CR1)
     TIM3->CR1 |= 0x01 << 0;

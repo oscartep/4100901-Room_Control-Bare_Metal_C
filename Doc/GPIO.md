@@ -66,11 +66,11 @@ typedef struct {
 #define EXTERNAL_LED_ONOFF_PORT  GPIOA
 
 #define USER_BUTTON_PIN             13    // PC13 para B1
-#define USER_BUTTON_PIN          GPIOC    
+#define USER_BUTTON_PORT         GPIOC    
 
 
 // Prototipos de funciones
-void gpio_pin_setup(GPIO_TypeDef *gpio_port, uint8_t pin_number,
+void gpio_setup_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number,
                     uint8_t mode, uint8_t alternate_function);
 
 uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
@@ -88,7 +88,7 @@ void gpio_toggle_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 #include "rcc.h"
 #include "nvic.h"
 
-void gpio_pin_setup(GPIO_TypeDef *gpio_port, uint8_t pin_number,
+void gpio_setup_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number,
                     uint8_t mode, uint8_t alternate_function)
 {
 
@@ -157,39 +157,38 @@ void EXTI15_10_IRQHandler(void) {
     }
 }
 
-
 ```
 
 ### Pines Específicos para el Taller y su Configuración:
 
 * PA5 (LD2 - Heartbeat): 
 ```c
-gpio_pin_setup(GPIOA, 5, GPIO_MODE_OUTPUT, 0);
+gpio_setup_pin(GPIOA, 5, GPIO_MODE_OUTPUT, 0); 
 ```
 
 * PA4 (LED Externo ON/OFF):
 ```c
-gpio_pin_setup(GPIOA, 4, GPIO_MODE_OUTPUT, 0);
+gpio_setup_pin(GPIOA, 7, GPIO_MODE_OUTPUT, 0);
 ```
 
 * PC13 (Botón B1 - para EXTI):
 ```c
-gpio_pin_setup(GPIOC, 13, GPIO_MODE_INPUT, 0);
+gpio_setup_pin(GPIOC, 13, GPIO_MODE_INPUT, 0);
 ```
 
-* PB4 (LED Externo PWM - TIM3_CH1):
+* PA6 (LED Externo PWM - TIM3_CH1):
 ```c
-gpio_pin_setup(GPIOB, 4, GPIO_MODE_AF, 2); // (AF2 para TIM3_CH1 en PA6)
+gpio_setup_pin(GPIOA, 6, GPIO_MODE_AF, 2); // (AF2 para TIM3_CH1 en PA6)
 ```
 
 * PA2 (USART2_TX):
 ```c
-gpio_pin_setup(GPIOA, 2, GPIO_MODE_AF, 7); // (AF7 para USART2 en PA2)
+gpio_setup_pin(GPIOA, 2, GPIO_MODE_AF, 7); // (AF7 para USART2 en PA2)
 ```
 
 * PA3 (USART2_RX):
 ```c
-gpio_pin_setup(GPIOA, 3, GPIO_MODE_AF, 7); // (AF7 para USART2 en PA2)
+gpio_setup_pin(GPIOA, 3, GPIO_MODE_AF, 7); // (AF7 para USART2 en PA2)
 ```
 
 Siguiente módulo: [Universal Asynchronous Receiver/Transmitter (UART.md)](UART.md).

@@ -33,7 +33,7 @@ Esta guía está dividida en varias secciones para facilitar el proceso de desar
 4.  **[Módulo GPIO (Doc/GPIO.md)](Doc/GPIO.md):** Configuración y manejo de pines de entrada/salida.
 5.  **[Módulo UART (Doc/UART.md)](Doc/UART.md):** Implementación de comunicación serial.
 6.  **[Módulo TIM/PWM (Doc/TIM.md)](Doc/TIM.md):** Generación de señales PWM.
-7.  **[Módulo EXTI (Doc/EXTI.md)](Doc/EXTI.md):** Configuración de interrupciones externas para el botón.
+7.  **[Módulo NVIC (Doc/NVIC.md)](Doc/NVIC.md):** Configuración de interrupciones.
 8.  **[Lógica de Control (Doc/ROOM_CONTROL.md)](Doc/ROOM_CONTROL.md):** Integración de la lógica de la aplicación.
 9. **[Función Principal (Doc/MAIN.md)](Doc/MAIN.md):** Estructura del archivo `main.c`.
 
