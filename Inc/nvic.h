@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file           : nvic.h
- * @author         : sam C
+ * @author         : Sam C
  * @brief          : Header file for NVIC driver for STM32L476RGTx
  ******************************************************************************
  */
@@ -151,7 +151,6 @@ typedef enum {
 } IRQn_Type;
 
 
-// Prototipos de funciones
 void nvic_exti_pc13_button_enable(void); // Configura EXTI13 y habilita su IRQ en NVIC
 void nvic_usart2_irq_enable(void);       // Habilita USART2 IRQ en NVIC (la config. de USART2 se hace en uart.c)
 

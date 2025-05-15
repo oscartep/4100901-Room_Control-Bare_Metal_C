@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file           : uart.c
- * @author         : sam C
+ * @author         : Sam C
  * @brief          : UART driver for STM32L476RGTx
  ******************************************************************************
  */
@@ -15,6 +15,7 @@
 #define USART_ISR_TXE           (1UL << USART_ISR_TXE_Pos)
 #define USART_ISR_RXNE_Pos      5U  // Read Data Register Not Empty
 #define USART_ISR_RXNE          (1UL << USART_ISR_RXNE_Pos)
+
 
 void uart2_init(uint32_t baud_rate)
 {
@@ -59,6 +60,11 @@ void uart2_send_string(const char *str)
     }
 }
 
+/**
+ * @brief Handler de interrupción para USART2
+ *        Este handler se llama cuando hay datos recibidos en USART2.
+ *        Procesa el dato recibido y lo envía de vuelta (eco).
+ */
 void USART2_IRQHandler(void)
 {
     // Verificar si la interrupción fue por RXNE (dato recibido y RDR no vacío)

@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file           : gpio.h
- * @author         : sam C
+ * @author         : Sam C
  * @brief          : Header file for GPIO driver for STM32L476RGTx
  ******************************************************************************
  */
@@ -57,12 +57,9 @@ typedef struct {
 #define USER_BUTTON_PORT         GPIOC    
 
 
-// Prototipos de funciones
-void gpio_setup_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number,
-                    uint8_t mode, uint8_t alternate_function);
-
-uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
+void gpio_setup_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number, uint8_t mode, uint8_t alternate_function);
 void gpio_write_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number, uint8_t pin_state);
+uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 void gpio_toggle_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number);
 
 #endif // GPIO_H

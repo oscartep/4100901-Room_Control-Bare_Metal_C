@@ -38,22 +38,22 @@ Realiza las siguientes conexiones en tu protoboard [Ver: [MB1136-DEFAULT-C03 Boa
     │   ├── gcc-arm-none-eabi.cmake
     │   └── vscode_generated.cmake
     ├── Inc/
-    │   ├── systick.h
+    │   ├── gpio.h
     │   ├── nvic.h
     │   ├── rcc.h
-    │   ├── gpio.h
+    │   └── room_control.h
+    │   ├── systick.h
     │   ├── tim.h
     │   ├── uart.h
-    │   └── room_control.h
     ├── Src/
-    │   ├── main.c
-    │   ├── systick.c
+    │   ├── gpio.c
+    │   ├── main.c  // Punto de entrada del programa
     │   ├── nvic.c
     │   ├── rcc.c
-    │   ├── gpio.c
+    │   ├── room_control.c
+    │   ├── systick.c
     │   ├── tim.c
-    │   ├── uart.c
-    │   └── room_control.c
+    │   └── uart.c
     ├── Startup/
     │   └── startup_stm32l476rgtx.s // Archivo de arranque
     ├── stm32l476rgtx_FLASH.ld     // Linker Script

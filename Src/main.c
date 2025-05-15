@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file           : main.c
- * @author         : sam C
+ * @author         : Sam C
  * @brief          : Main program body
  ******************************************************************************
  */
@@ -21,7 +21,11 @@ void heartbeat_led_toggle(void)
     }
 }
 
-
+/**
+ * @brief Función principal del programa.
+ *        Configura los periféricos y entra en un bucle infinito.
+ *        El LED de heartbeat parpadea cada 500 ms.
+*/
 int main(void)
 {
     // Inicialización de SysTick

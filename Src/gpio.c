@@ -1,7 +1,7 @@
 /**
  ******************************************************************************
  * @file           : gpio.c
- * @author         : sam C
+ * @author         : Sam C
  * @brief          : GPIO driver for STM32L476RGTx
  ******************************************************************************
  */
@@ -12,7 +12,6 @@
 void gpio_setup_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number,
                     uint8_t mode, uint8_t alternate_function)
 {
-
     // 1. Habilitar el reloj para el puerto GPIO correspondiente
     //    La función rcc_gpio_clock_enable se encarga de esto.
     rcc_gpio_clock_enable(gpio_port);
@@ -50,6 +49,7 @@ void gpio_write_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number, uint8_t pin_sta
 
 void gpio_toggle_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number)
 {
+    // Alternar el estado del pin usando ODR (Output Data Register)
     gpio_port->ODR ^= (1U << pin_number);
 }
 
