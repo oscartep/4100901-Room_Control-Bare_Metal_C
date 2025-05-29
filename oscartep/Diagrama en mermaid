@@ -1,0 +1,42 @@
+flowchart LR
+  %% Inicialización
+  subgraph Inicialización
+    A1[Inicio] 
+    A2[Configurar SysTick] 
+    A3[Configurar GPIO LEDs y botón] 
+    A4[Configurar UART2] 
+    A5[Configurar TIM3 PWM] 
+    A6[Configurar EXTI PC13]
+    A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7[UART envía sistema inicializado]
+  end
+
+  %% Bucle principal
+  subgraph BuclePrincipal
+    B1[Parpadeo LED LD2 cada 500 ms]
+    B2[Verificar timeout LED PA7 mas de 3 s]
+    B1 --> B2 --> B1
+  end
+
+  %% Interrupciones
+  subgraph Interrupciones
+    direction TB
+    subgraph Botón
+      C1[/IRQ Botón PC13/] 
+      C2[OnButton encender LED PA7 y guardar tiempo] 
+      C1 --> C2 --> C3[Volver a bucle principal]
+    end
+    subgraph UART
+      D1[/IRQ UART RX/] 
+      D2[Leer carácter y procesar comando] 
+      D1 --> D2 --> D3[Volver a bucle principal]
+    end
+  end
+
+  %% Conexiones generales
+  A7 --> B1
+  C3 --> B1
+  D3 --> B1
+
+  style Inicialización fill:#f0f0f0,stroke:#333,stroke-width:1px
+  style BuclePrincipal fill:#e0ffe0,stroke:#333,stroke-width:1px
+  style Interrupciones fill:#ffe0e0,stroke:#333,stroke-width:1px
