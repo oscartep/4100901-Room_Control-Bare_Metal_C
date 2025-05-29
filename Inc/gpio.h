@@ -50,7 +50,7 @@ typedef struct {
 #define EXTERNAL_LED_PWM_PIN        6     // PA6 (TIM3_CH1)
 #define EXTERNAL_LED_PWM_PORT    GPIOA
 
-#define EXTERNAL_LED_ONOFF_PIN      7     // PA7 para emulacion de estado de puerta
+#define EXTERNAL_LED_ONOFF_PIN      7     // PA7
 #define EXTERNAL_LED_ONOFF_PORT  GPIOA
 
 #define USER_BUTTON_PIN             13    // PC13 para B1

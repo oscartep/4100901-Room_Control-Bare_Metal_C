@@ -61,7 +61,7 @@ int _kill(int pid, int sig)
 void _exit (int status)
 {
   _kill(status, -1);
-  while (1) {}    /* Make sure we hang here */
+  while (1) {}    
 }
 
 __attribute__((weak)) int _read(int file, char *ptr, int len)
@@ -121,7 +121,7 @@ int _open(char *path, int flags, ...)
 {
   (void)path;
   (void)flags;
-  /* Pretend like we always fail */
+  
   return -1;
 }
 

@@ -6,31 +6,59 @@
  ******************************************************************************
  */
 #include "room_control.h"
+#include "gpio.h"
+#include "systick.h"
+#include "uart.h"
+#include "tim.h"
 
-#include "gpio.h"    // Para controlar LEDs y leer el botón (aunque el botón es por EXTI)
-#include "systick.h" // Para obtener ticks y manejar retardos/tiempos
-#include "uart.h"    // Para enviar mensajes
-#include "tim.h"     // Para controlar el PWM
+// Variables de control del LED
+static uint8_t led_on = 0;
+static uint32_t led_start_time = 0;
 
 void room_control_app_init(void)
 {
-    // Inicializar variables de estado si es necesario.
-    // Por ejemplo, asegurar que los LEDs estén apagados al inicio
-
-    // tim3_ch1_pwm_set_duty_cycle(50); // Establecer un duty cycle inicial para el PWM LED
+    gpio_write_pin(EXTERNAL_LED_ONOFF_PORT, EXTERNAL_LED_ONOFF_PIN, GPIO_PIN_RESET);
+    tim3_ch1_pwm_set_duty_cycle(70); 
 }
 
 void room_control_on_button_press(void)
 {
-    // TODO: Implementar anti-rebote
-    // TODO: Procesar la presion para realizar acciones
-    uart2_send_string("Boton B1: Presionado.\r\n");
+    uart2_send_string("Boton presionado.\r\n");
+
+    gpio_write_pin(EXTERNAL_LED_ONOFF_PORT, EXTERNAL_LED_ONOFF_PIN, GPIO_PIN_SET);
+    led_on = 1;
+    led_start_time = systick_get_tick();
+}
+
+void room_control_update(void)
+{
+    if (led_on && (systick_get_tick() - led_start_time >= 3000)) {
+        gpio_write_pin(EXTERNAL_LED_ONOFF_PORT, EXTERNAL_LED_ONOFF_PIN, GPIO_PIN_RESET);
+        led_on = 0;
+        uart2_send_string("LED apagado por tres segundos.\r\n");
+    }
 }
 
 void room_control_on_uart_receive(char received_char)
 {
-    // TODO: Procesar el carácter para realizar acciones
-    // Ejemplo: si recibe 'h' o 'H', encender el LED PWM al 100%.
-    //          si recibe 'l' o 'L', apagar el LED PWM (0%).
-    //          si recibe 't', hacer toggle del LED ON/OFF.
+    switch (received_char) {
+        case 'h':
+        case 'H':
+            tim3_ch1_pwm_set_duty_cycle(100);
+            uart2_send_string("LED al 100%\r\n");
+            break;
+        case 'l':
+        case 'L':
+            tim3_ch1_pwm_set_duty_cycle(0);
+            uart2_send_string("LED al 0%\r\n");
+            break;
+        case 't':
+        case 'T':
+            gpio_toggle_pin(EXTERNAL_LED_ONOFF_PORT, EXTERNAL_LED_ONOFF_PIN);
+            uart2_send_string("LED ON/OFF\r\n");
+            break;
+        default:
+            uart2_send_string("Comando no reconocido\r\n");
+            break;
+    }
 }

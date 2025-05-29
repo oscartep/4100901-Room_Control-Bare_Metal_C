@@ -5,6 +5,7 @@
  * @brief          : GPIO driver for STM32L476RGTx
  ******************************************************************************
  */
+#include "room_control.h" // Agrega este include si no está*********
 #include "gpio.h"
 #include "rcc.h"
 #include "nvic.h"
@@ -72,9 +73,12 @@ uint8_t gpio_read_pin(GPIO_TypeDef *gpio_port, uint8_t pin_number)
 void EXTI15_10_IRQHandler(void) {
     // 1. Verificar si la interrupción fue de la línea EXTI13
     if ((EXTI->PR1 & (1U << 13)) != 0) {
-        // 2. Limpiar el flag de pendiente de la interrupción (escribiendo '1')
+        // 2. Limpiar y quedar pendiente de la interrupción (escribiendo '1')
         EXTI->PR1 |= (1U << 13);
-        // 3. Procesar boton presionado
+        // 3. Leer boton presionado
+        room_control_on_button_press(); 
     }
 }
+
+
 
